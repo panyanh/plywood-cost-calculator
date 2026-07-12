@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>人造胶合板成本计算器</title>
+<style>
+  :root {
+    --bg: #F5F4EE;
+    --card-bg: #FFFFFF;
+    --border: #E8E6DD;
+    --text: #2D2A26;
+    --text-muted: #8A8578;
+    --accent: #D97757;
+    --accent-dark: #C05C3A;
+    --accent-bg: #FBEEE8;
+    --total-bg: #2D2A26;
+    --total-text: #FDFBF7;
+    --radius: 14px;
+    --shadow: 0 1px 3px rgba(45,42,38,0.08), 0 2px 8px rgba(45,42,38,0.05);
+  }
+  * { box-sizing: border-box; }
+  html { font-size: 16px; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", "Microsoft YaHei", "PingFang SC", -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  /* 顶部栏 */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.75rem;
+    background: rgba(245,244,238,0.92);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar .titles h1 {
+    font-size: 1.25rem;
+    margin: 0 0 0.15rem;
+    letter-spacing: 0.2px;
+  }
+  .topbar .titles .subtitle {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+  .font-control {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.25rem 0.4rem;
+    box-shadow: var(--shadow);
+    flex-shrink: 0;
+  }
+  .font-control button {
+    width: 1.9rem;
+    height: 1.9rem;
+    border-radius: 50%;
+    border: none;
+    background: var(--accent-bg);
+    color: var(--accent-dark);
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .font-control button:hover { background: var(--accent); color: #fff; }
+  .font-control button:disabled { opacity: 0.35; cursor: default; }
+  .font-control button:disabled:hover { background: var(--accent-bg); color: var(--accent-dark); }
+  .font-control .level-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    min-width: 2.4rem;
+    text-align: center;
+  }
+
+  .page {
+    padding: 1.5rem 1.75rem 3rem;
+  }
+  .layout {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 1.25rem;
+    align-items: start;
+    max-width: 1140px;
+    margin: 0 auto;
+  }
+  @media (max-width: 860px) {
+    .layout { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.1rem 1.25rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow);
+  }
+  .card h2 {
+    font-size: 0.95rem;
+    margin: 0 0 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 600;
+  }
+  .card h2 .badge {
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--accent-dark);
+    background: var(--accent-bg);
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 5rem 1fr;
+    gap: 0.6rem;
+    align-items: center;
+    margin-bottom: 0.65rem;
+  }
+  .row label {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+  select, input[type="number"] {
+    width: 100%;
+    padding: 0.45rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    background: #fff;
+    color: var(--text);
+    font-family: inherit;
+  }
+  select:focus, input[type="number"]:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-bg);
+  }
+  .inline-pair { display: flex; gap: 0.5rem; }
+  .inline-pair select { flex: 1; }
+  .inline-pair input { flex: 1; display: none; }
+
+  /* 步进器 */
+  .stepper {
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .stepper button {
+    width: 2.1rem;
+    height: 2.1rem;
+    border: none;
+    background: var(--accent-bg);
+    color: var(--accent-dark);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .stepper button:hover { background: var(--accent); color: #fff; }
+  .stepper .stepper-value {
+    min-width: 3.6rem;
+    text-align: center;
+    font-size: 0.88rem;
+    font-weight: 600;
+  }
+
+  /* 开关 */
+  .switch-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+    margin-bottom: 0.9rem;
+    padding-bottom: 0.9rem;
+    border-bottom: 1px dashed var(--border);
+  }
+  .switch-row .switch-label {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+  .switch {
+    position: relative;
+    width: 2.6rem;
+    height: 1.5rem;
+    flex-shrink: 0;
+  }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .switch .track {
+    position: absolute;
+    inset: 0;
+    background: var(--border);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .switch .track::before {
+    content: "";
+    position: absolute;
+    width: 1.15rem;
+    height: 1.15rem;
+    left: 0.17rem;
+    top: 0.17rem;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform 0.15s;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  }
+  .switch input:checked + .track { background: var(--accent); }
+  .switch input:checked + .track::before { transform: translateX(1.1rem); }
+
+  .subtotal-line {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.82rem;
+    padding-top: 0.6rem;
+    border-top: 1px dashed var(--border);
+    color: var(--text-muted);
+  }
+  .subtotal-line .value {
+    color: var(--text);
+    font-weight: 700;
+  }
+
+  .split-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.8rem;
+  }
+  @media (max-width: 700px) {
+    .split-grid { grid-template-columns: 1fr; }
+  }
+  .split-card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.8rem;
+  }
+  .split-card h3 {
+    font-size: 0.82rem;
+    margin: 0 0 0.6rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .split-card h3 .mini-badge {
+    font-size: 0.68rem;
+    font-weight: 500;
+    color: var(--accent-dark);
+    background: var(--accent-bg);
+    padding: 0.1rem 0.4rem;
+    border-radius: 999px;
+  }
+  .split-card .row { grid-template-columns: 1fr; gap: 0.3rem; margin-bottom: 0.5rem; }
+
+  .summary-card { position: sticky; top: 5.2rem; }
+  .summary-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-bottom: 1rem; }
+  .summary-table td { padding: 0.5rem 0.25rem; border-bottom: 1px solid var(--border); }
+  .summary-table td:last-child { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+
+  .total-box {
+    background: var(--total-bg);
+    color: var(--total-text);
+    border-radius: var(--radius);
+    padding: 1.3rem;
+    text-align: center;
+  }
+  .total-box .label { font-size: 0.8rem; opacity: 0.7; margin-bottom: 0.3rem; }
+  .total-box .amount { font-size: 1.9rem; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--accent); }
+  .total-box .amount .unit { font-size: 0.9rem; font-weight: 400; opacity: 0.7; color: var(--total-text); margin-left: 0.2rem; }
+
+  .readonly-note { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.5rem; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="titles">
+    <h1>人造胶合板成本计算器</h1>
+    <div class="subtitle">单板规格 1.27m × 0.63m，每层 4 张拼合</div>
+  </div>
+  <div class="font-control">
+    <button id="fontDec" type="button">A−</button>
+    <span class="level-label" id="fontLevelLabel">标准</span>
+    <button id="fontInc" type="button">A+</button>
+  </div>
+</div>
+
+<div class="page">
+<div class="layout">
+  <div class="left-col">
+
+    <div class="card">
+      <h2>板材结构</h2>
+      <div class="row" style="grid-template-columns: 5rem 1fr;">
+        <label>总层数</label>
+        <div class="stepper">
+          <button type="button" id="totalLayersDec">−</button>
+          <span class="stepper-value" id="totalLayersValue">3 层</span>
+          <button type="button" id="totalLayersInc">+</button>
+        </div>
+      </div>
+      <div class="readonly-note">
+        面板 1 层 + 底板 1 层（固定）+ 芯板 <span id="coreLayersLabel">1</span> 层
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>单板参数</h2>
+      <div class="switch-row">
+        <span class="switch-label">三层统一：面板/芯板/底板<br>使用同一组厚度、树种、单价</span>
+        <label class="switch">
+          <input type="checkbox" id="unifyToggle" checked>
+          <span class="track"></span>
+        </label>
+      </div>
+
+      <!-- 统一模式 -->
+      <div id="unifiedBlock">
+        <div class="row">
+          <label>厚度</label>
+          <div class="inline-pair">
+            <select class="thickness-select"></select>
+            <input type="number" class="thickness-custom" placeholder="自定义厚度(mm)" step="0.1" min="0.1">
+          </div>
+        </div>
+        <div class="row">
+          <label>树种</label>
+          <select class="species-select">
+            <option value="桉树">桉树</option>
+            <option value="杉木">杉木</option>
+          </select>
+        </div>
+        <div class="row">
+          <label>单价</label>
+          <input type="number" class="price-input" placeholder="元/m³" min="0" step="1">
+        </div>
+        <div class="subtotal-line">
+          <span>三层合计用料 <span id="unifiedVolumeOut">0.000</span> m³</span>
+          <span class="value"><span id="unifiedSubtotalOut">0.00</span> 元</span>
+        </div>
+      </div>
+
+      <!-- 分层模式 -->
+      <div id="splitBlock" style="display:none;">
+        <div class="split-grid">
+          <div class="split-card" data-layer="face">
+            <h3>面板 <span class="mini-badge">1层</span></h3>
+            <div class="row">
+              <label>厚度</label>
+            </div>
+            <div class="inline-pair">
+              <select class="thickness-select"></select>
+              <input type="number" class="thickness-custom" placeholder="自定义(mm)" step="0.1" min="0.1">
+            </div>
+            <div class="row" style="margin-top:0.5rem;"><label>树种</label></div>
+            <select class="species-select">
+              <option value="桉树">桉树</option>
+              <option value="杉木">杉木</option>
+            </select>
+            <div class="row" style="margin-top:0.5rem;"><label>单价</label></div>
+            <input type="number" class="price-input" placeholder="元/m³" min="0" step="1">
+            <div class="subtotal-line">
+              <span class="volume-out">0.000</span>
+              <span class="value"><span class="subtotal-out">0.00</span></span>
+            </div>
+          </div>
+
+          <div class="split-card" data-layer="core">
+            <h3>芯板 <span class="mini-badge"><span class="core-layer-count">1</span>层</span></h3>
+            <div class="row"><label>厚度</label></div>
+            <div class="inline-pair">
+              <select class="thickness-select"></select>
+              <input type="number" class="thickness-custom" placeholder="自定义(mm)" step="0.1" min="0.1">
+            </div>
+            <div class="row" style="margin-top:0.5rem;"><label>树种</label></div>
+            <select class="species-select">
+              <option value="桉树">桉树</option>
+              <option value="杉木">杉木</option>
+            </select>
+            <div class="row" style="margin-top:0.5rem;"><label>单价</label></div>
+            <input type="number" class="price-input" placeholder="元/m³" min="0" step="1">
+            <div class="subtotal-line">
+              <span class="volume-out">0.000</span>
+              <span class="value"><span class="subtotal-out">0.00</span></span>
+            </div>
+          </div>
+
+          <div class="split-card" data-layer="back">
+            <h3>底板 <span class="mini-badge">1层</span></h3>
+            <div class="row"><label>厚度</label></div>
+            <div class="inline-pair">
+              <select class="thickness-select"></select>
+              <input type="number" class="thickness-custom" placeholder="自定义(mm)" step="0.1" min="0.1">
+            </div>
+            <div class="row" style="margin-top:0.5rem;"><label>树种</label></div>
+            <select class="species-select">
+              <option value="桉树">桉树</option>
+              <option value="杉木">杉木</option>
+            </select>
+            <div class="row" style="margin-top:0.5rem;"><label>单价</label></div>
+            <input type="number" class="price-input" placeholder="元/m³" min="0" step="1">
+            <div class="subtotal-line">
+              <span class="volume-out">0.000</span>
+              <span class="value"><span class="subtotal-out">0.00</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>面皮 <span class="badge">固定 1 套 / 张</span></h2>
+      <div class="row">
+        <label>单价</label>
+        <input type="number" id="facingPrice" placeholder="元/套" min="0" step="0.1">
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>胶水 + 面粉</h2>
+      <div class="row">
+        <label>层数</label>
+        <div class="stepper">
+          <button type="button" id="glueLayersDec">−</button>
+          <span class="stepper-value" id="glueLayersValue">2 层</span>
+          <button type="button" id="glueLayersInc">+</button>
+        </div>
+      </div>
+      <div class="row">
+        <label>单价</label>
+        <input type="number" id="gluePrice" placeholder="元/层" min="0" step="0.1">
+      </div>
+      <div class="subtotal-line">
+        <span>胶线数 <span id="glueLinesOut">2</span> 条</span>
+        <span class="value"><span id="glueSubtotal">0.00</span> 元</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>人工</h2>
+      <div class="row">
+        <label>单价</label>
+        <input type="number" id="laborPrice" placeholder="元/张" min="0" step="0.1">
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>电费 / 能源 / 管理费 / 固定开支</h2>
+      <div class="row">
+        <label>单价</label>
+        <input type="number" id="overheadPrice" placeholder="元/张（打包）" min="0" step="0.1">
+      </div>
+    </div>
+
+  </div>
+
+  <div class="right-col summary-card">
+    <div class="card">
+      <h2>成本明细</h2>
+      <table class="summary-table" id="summaryTable">
+        <tr><td>面板单板</td><td id="sumFace">0.00</td></tr>
+        <tr><td>芯板单板</td><td id="sumCore">0.00</td></tr>
+        <tr><td>底板单板</td><td id="sumBack">0.00</td></tr>
+        <tr><td>面皮</td><td id="sumFacing">0.00</td></tr>
+        <tr><td>胶水 + 面粉</td><td id="sumGlue">0.00</td></tr>
+        <tr><td>人工</td><td id="sumLabor">0.00</td></tr>
+        <tr><td>电费/能源/管理费/固定开支</td><td id="sumOverhead">0.00</td></tr>
+      </table>
+    </div>
+    <div class="total-box">
+      <div class="label">单张成品成本</div>
+      <div class="amount"><span id="grandTotal">0.00</span><span class="unit"> 元 / 张</span></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+const LENGTH = 1.27;
+const WIDTH = 0.63;
+const SHEETS_PER_LAYER = 4;
+const THICKNESS_OPTIONS = ['1.5', '1.7', '2.0', '2.2', '2.8', '3.0', '3.2', '3.6'];
+
+/* ---------- 字体缩放 ---------- */
+const FONT_LEVELS = [14, 16, 18, 21];
+const FONT_LEVEL_NAMES = ['小', '标准', '大', '超大'];
+let fontLevelIndex = 1;
+function applyFontSize() {
+  document.documentElement.style.fontSize = FONT_LEVELS[fontLevelIndex] + 'px';
+  document.getElementById('fontLevelLabel').textContent = FONT_LEVEL_NAMES[fontLevelIndex];
+  document.getElementById('fontDec').disabled = fontLevelIndex === 0;
+  document.getElementById('fontInc').disabled = fontLevelIndex === FONT_LEVELS.length - 1;
+}
+document.getElementById('fontDec').addEventListener('click', () => {
+  if (fontLevelIndex > 0) { fontLevelIndex--; applyFontSize(); }
+});
+document.getElementById('fontInc').addEventListener('click', () => {
+  if (fontLevelIndex < FONT_LEVELS.length - 1) { fontLevelIndex++; applyFontSize(); }
+});
+applyFontSize();
+
+/* ---------- 厚度下拉构建 ---------- */
+function buildThicknessSelect(select) {
+  THICKNESS_OPTIONS.forEach(t => {
+    const opt = document.createElement('option');
+    opt.value = t;
+    opt.textContent = t + ' mm';
+    select.appendChild(opt);
+  });
+  const customOpt = document.createElement('option');
+  customOpt.value = 'custom';
+  customOpt.textContent = '自定义...';
+  select.appendChild(customOpt);
+}
+document.querySelectorAll('.thickness-select').forEach(buildThicknessSelect);
+
+document.querySelectorAll('.inline-pair').forEach(pair => {
+  const select = pair.querySelector('.thickness-select');
+  const customInput = pair.querySelector('.thickness-custom');
+  select.addEventListener('change', () => {
+    customInput.style.display = select.value === 'custom' ? 'block' : 'none';
+    calculate();
+  });
+});
+
+function getThicknessFrom(container) {
+  const select = container.querySelector('.thickness-select');
+  const customInput = container.querySelector('.thickness-custom');
+  if (select.value === 'custom') return parseFloat(customInput.value) || 0;
+  return parseFloat(select.value) || 0;
+}
+function getPriceFrom(container) {
+  return parseFloat(container.querySelector('.price-input').value) || 0;
+}
+function layerCostCalc(thicknessMm, price, layerCount) {
+  const thicknessM = thicknessMm / 1000;
+  const volume = LENGTH * WIDTH * thicknessM * SHEETS_PER_LAYER * layerCount;
+  return { volume, cost: volume * price };
+}
+
+/* ---------- 三层统一开关 ---------- */
+const unifyToggle = document.getElementById('unifyToggle');
+const unifiedBlock = document.getElementById('unifiedBlock');
+const splitBlock = document.getElementById('splitBlock');
+unifyToggle.addEventListener('change', () => {
+  unifiedBlock.style.display = unifyToggle.checked ? 'block' : 'none';
+  splitBlock.style.display = unifyToggle.checked ? 'none' : 'block';
+  calculate();
+});
+
+/* ---------- 总层数步进器（奇数 3~9）---------- */
+let totalLayers = 3;
+function updateTotalLayersDisplay() {
+  document.getElementById('totalLayersValue').textContent = totalLayers + ' 层';
+  document.getElementById('totalLayersDec').disabled = totalLayers <= 3;
+  document.getElementById('totalLayersInc').disabled = totalLayers >= 9;
+  document.getElementById('coreLayersLabel').textContent = totalLayers - 2;
+  document.querySelectorAll('.core-layer-count').forEach(el => el.textContent = totalLayers - 2);
+}
+document.getElementById('totalLayersDec').addEventListener('click', () => {
+  if (totalLayers > 3) { totalLayers -= 2; updateTotalLayersDisplay(); calculate(); }
+});
+document.getElementById('totalLayersInc').addEventListener('click', () => {
+  if (totalLayers < 9) { totalLayers += 2; updateTotalLayersDisplay(); calculate(); }
+});
+updateTotalLayersDisplay();
+
+/* ---------- 胶水层数步进器（1~8）---------- */
+let glueLayers = 2;
+function updateGlueLayersDisplay() {
+  document.getElementById('glueLayersValue').textContent = glueLayers + ' 层';
+  document.getElementById('glueLayersDec').disabled = glueLayers <= 1;
+  document.getElementById('glueLayersInc').disabled = glueLayers >= 8;
+  document.getElementById('glueLinesOut').textContent = glueLayers;
+}
+document.getElementById('glueLayersDec').addEventListener('click', () => {
+  if (glueLayers > 1) { glueLayers--; updateGlueLayersDisplay(); calculate(); }
+});
+document.getElementById('glueLayersInc').addEventListener('click', () => {
+  if (glueLayers < 8) { glueLayers++; updateGlueLayersDisplay(); calculate(); }
+});
+updateGlueLayersDisplay();
+
+/* ---------- 主计算 ---------- */
+function calculate() {
+  const coreLayers = totalLayers - 2;
+  let face, core, back;
+
+  if (unifyToggle.checked) {
+    const thicknessMm = getThicknessFrom(unifiedBlock);
+    const price = getPriceFrom(unifiedBlock);
+    face = layerCostCalc(thicknessMm, price, 1);
+    core = layerCostCalc(thicknessMm, price, coreLayers);
+    back = layerCostCalc(thicknessMm, price, 1);
+    const totalVolume = face.volume + core.volume + back.volume;
+    const totalCost = face.cost + core.cost + back.cost;
+    document.getElementById('unifiedVolumeOut').textContent = totalVolume.toFixed(4);
+    document.getElementById('unifiedSubtotalOut').textContent = totalCost.toFixed(2);
+  } else {
+    const faceCard = splitBlock.querySelector('.split-card[data-layer="face"]');
+    const coreCard = splitBlock.querySelector('.split-card[data-layer="core"]');
+    const backCard = splitBlock.querySelector('.split-card[data-layer="back"]');
+
+    face = layerCostCalc(getThicknessFrom(faceCard), getPriceFrom(faceCard), 1);
+    core = layerCostCalc(getThicknessFrom(coreCard), getPriceFrom(coreCard), coreLayers);
+    back = layerCostCalc(getThicknessFrom(backCard), getPriceFrom(backCard), 1);
+
+    faceCard.querySelector('.volume-out').textContent = '用料 ' + face.volume.toFixed(4) + ' m³';
+    faceCard.querySelector('.subtotal-out').textContent = face.cost.toFixed(2) + ' 元';
+    coreCard.querySelector('.volume-out').textContent = '用料 ' + core.volume.toFixed(4) + ' m³';
+    coreCard.querySelector('.subtotal-out').textContent = core.cost.toFixed(2) + ' 元';
+    backCard.querySelector('.volume-out').textContent = '用料 ' + back.volume.toFixed(4) + ' m³';
+    backCard.querySelector('.subtotal-out').textContent = back.cost.toFixed(2) + ' 元';
+  }
+
+  const facingCost = parseFloat(document.getElementById('facingPrice').value) || 0;
+  const gluePrice = parseFloat(document.getElementById('gluePrice').value) || 0;
+  const glueCost = gluePrice * glueLayers;
+  const laborCost = parseFloat(document.getElementById('laborPrice').value) || 0;
+  const overheadCost = parseFloat(document.getElementById('overheadPrice').value) || 0;
+
+  document.getElementById('glueSubtotal').textContent = glueCost.toFixed(2);
+  document.getElementById('sumFace').textContent = face.cost.toFixed(2);
+  document.getElementById('sumCore').textContent = core.cost.toFixed(2);
+  document.getElementById('sumBack').textContent = back.cost.toFixed(2);
+  document.getElementById('sumFacing').textContent = facingCost.toFixed(2);
+  document.getElementById('sumGlue').textContent = glueCost.toFixed(2);
+  document.getElementById('sumLabor').textContent = laborCost.toFixed(2);
+  document.getElementById('sumOverhead').textContent = overheadCost.toFixed(2);
+
+  const total = face.cost + core.cost + back.cost + facingCost + glueCost + laborCost + overheadCost;
+  document.getElementById('grandTotal').textContent = total.toFixed(2);
+}
+
+document.querySelectorAll('select, input').forEach(el => {
+  el.addEventListener('input', calculate);
+  el.addEventListener('change', calculate);
+});
+
+calculate();
+</script>
+
+</body>
+</html>
