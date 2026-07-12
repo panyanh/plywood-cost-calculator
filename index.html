@@ -36,7 +36,9 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1rem 1.75rem;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    padding: 0.8rem 1.75rem;
     background: rgba(245,244,238,0.92);
     backdrop-filter: blur(6px);
     border-bottom: 1px solid var(--border);
@@ -83,6 +85,34 @@
     color: var(--text-muted);
     min-width: 2.4rem;
     text-align: center;
+  }
+
+  .live-total {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    background: var(--total-bg);
+    color: var(--total-text);
+    border-radius: 999px;
+    padding: 0.4rem 0.9rem;
+    box-shadow: var(--shadow);
+    flex-shrink: 0;
+  }
+  .live-total .lt-label {
+    font-size: 0.72rem;
+    opacity: 0.7;
+  }
+  .live-total .lt-amount {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+  .live-total .lt-unit {
+    font-size: 0.68rem;
+    font-weight: 400;
+    opacity: 0.7;
+    margin-left: 0.15rem;
   }
 
   .page {
@@ -271,20 +301,9 @@
   .split-card .row { grid-template-columns: 1fr; gap: 0.3rem; margin-bottom: 0.5rem; }
 
   .summary-card { position: sticky; top: 5.2rem; }
-  .summary-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-bottom: 1rem; }
+  .summary-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-bottom: 0; }
   .summary-table td { padding: 0.5rem 0.25rem; border-bottom: 1px solid var(--border); }
   .summary-table td:last-child { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
-
-  .total-box {
-    background: var(--total-bg);
-    color: var(--total-text);
-    border-radius: var(--radius);
-    padding: 1.3rem;
-    text-align: center;
-  }
-  .total-box .label { font-size: 0.8rem; opacity: 0.7; margin-bottom: 0.3rem; }
-  .total-box .amount { font-size: 1.9rem; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--accent); }
-  .total-box .amount .unit { font-size: 0.9rem; font-weight: 400; opacity: 0.7; color: var(--total-text); margin-left: 0.2rem; }
 
   .readonly-note { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.5rem; }
 </style>
@@ -295,6 +314,10 @@
   <div class="titles">
     <h1>人造胶合板成本计算器</h1>
     <div class="subtitle">单板规格 1.27m × 0.63m，每层 4 张拼合</div>
+  </div>
+  <div class="live-total">
+    <span class="lt-label">单张成本</span>
+    <span class="lt-amount"><span id="grandTotal">0.00</span><span class="lt-unit">元/张</span></span>
   </div>
   <div class="font-control">
     <button id="fontDec" type="button">A−</button>
@@ -484,10 +507,6 @@
         <tr><td>人工</td><td id="sumLabor">0.00</td></tr>
         <tr><td>电费/能源/管理费/固定开支</td><td id="sumOverhead">0.00</td></tr>
       </table>
-    </div>
-    <div class="total-box">
-      <div class="label">单张成品成本</div>
-      <div class="amount"><span id="grandTotal">0.00</span><span class="unit"> 元 / 张</span></div>
     </div>
   </div>
 </div>
