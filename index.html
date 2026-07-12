@@ -212,6 +212,55 @@
     font-weight: 600;
   }
 
+  /* 滑块 */
+  .slider-wrap { display: flex; flex-direction: column; gap: 0.4rem; }
+  .slider-current {
+    display: inline-block;
+    align-self: flex-start;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--accent-dark);
+    background: var(--accent-bg);
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+  }
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 0.35rem;
+    border-radius: 999px;
+    background: var(--accent-bg);
+    outline: none;
+    margin: 0.3rem 0;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 1.15rem;
+    height: 1.15rem;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    border: 2px solid var(--card-bg);
+    box-shadow: var(--shadow);
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 1.15rem;
+    height: 1.15rem;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    border: 2px solid var(--card-bg);
+    box-shadow: var(--shadow);
+  }
+  input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .slider-track-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    padding: 0 0.1rem;
+  }
+
   /* 开关 */
   .switch-row {
     display: flex;
@@ -300,6 +349,69 @@
   }
   .split-card .row { grid-template-columns: 1fr; gap: 0.3rem; margin-bottom: 0.5rem; }
 
+  /* 芯板多规格 */
+  .core-multi-switch-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-bottom: 0.6rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px dashed var(--border);
+  }
+  .core-multi-switch-row .switch { width: 2.2rem; height: 1.3rem; }
+  .core-multi-switch-row .switch .track::before { width: 0.96rem; height: 0.96rem; }
+  .core-multi-switch-row .switch input:checked + .track::before { transform: translateX(0.9rem); }
+  .core-alloc-note {
+    font-size: 0.74rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+  }
+  .core-alloc-note.mismatch { color: #B5502E; font-weight: 600; }
+  .core-group-row {
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    padding: 0.6rem;
+    margin-bottom: 0.5rem;
+  }
+  .core-group-row .inline-pair { margin-bottom: 0.4rem; }
+  .core-group-row .species-select { margin-bottom: 0.4rem; }
+  .core-group-row .price-input { margin-bottom: 0.4rem; }
+  .core-group-row-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+  .core-group-row .stepper button { width: 1.7rem; height: 1.7rem; font-size: 0.85rem; }
+  .core-group-row .stepper .stepper-value { min-width: 2.6rem; font-size: 0.78rem; }
+  .remove-group-btn {
+    border: none;
+    background: none;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    cursor: pointer;
+    padding: 0.2rem 0.4rem;
+  }
+  .remove-group-btn:hover { color: #B5502E; }
+  .add-group-btn {
+    width: 100%;
+    border: 1px dashed var(--accent);
+    background: var(--accent-bg);
+    color: var(--accent-dark);
+    border-radius: 8px;
+    padding: 0.45rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 0.6rem;
+  }
+  .add-group-btn:hover { background: var(--accent); color: #fff; }
+  .add-group-btn:disabled { opacity: 0.4; cursor: default; }
+  .add-group-btn:disabled:hover { background: var(--accent-bg); color: var(--accent-dark); }
+
   .summary-card { position: sticky; top: 5.2rem; }
   .summary-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-bottom: 0; }
   .summary-table td { padding: 0.5rem 0.25rem; border-bottom: 1px solid var(--border); }
@@ -332,12 +444,18 @@
 
     <div class="card">
       <h2>板材结构</h2>
-      <div class="row" style="grid-template-columns: 5rem 1fr;">
-        <label>总层数</label>
-        <div class="stepper">
-          <button type="button" id="totalLayersDec">−</button>
-          <span class="stepper-value" id="totalLayersValue">3 层</span>
-          <button type="button" id="totalLayersInc">+</button>
+      <div class="row" style="grid-template-columns: 5rem 1fr; align-items: start;">
+        <label style="padding-top: 0.3rem;">总层数</label>
+        <div class="slider-wrap">
+          <span class="slider-current" id="totalLayersValue">3 层</span>
+          <input type="range" id="totalLayersSlider" min="3" max="9" step="2" value="3" list="totalLayersTicks">
+          <datalist id="totalLayersTicks">
+            <option value="3"></option>
+            <option value="5"></option>
+            <option value="7"></option>
+            <option value="9"></option>
+          </datalist>
+          <div class="slider-track-labels"><span>3层</span><span>5层</span><span>7层</span><span>9层</span></div>
         </div>
       </div>
       <div class="readonly-note">
@@ -408,21 +526,44 @@
 
           <div class="split-card" data-layer="core">
             <h3>芯板 <span class="mini-badge"><span class="core-layer-count">1</span>层</span></h3>
-            <div class="row"><label>厚度</label></div>
-            <div class="inline-pair">
-              <select class="thickness-select"></select>
-              <input type="number" class="thickness-custom" placeholder="自定义(mm)" step="0.1" min="0.1">
+
+            <div class="core-multi-switch-row">
+              <span>多规格：分组填写不同厚度</span>
+              <label class="switch">
+                <input type="checkbox" id="coreMultiToggle">
+                <span class="track"></span>
+              </label>
             </div>
-            <div class="row" style="margin-top:0.5rem;"><label>树种</label></div>
-            <select class="species-select">
-              <option value="桉树">桉树</option>
-              <option value="杉木">杉木</option>
-            </select>
-            <div class="row" style="margin-top:0.5rem;"><label>单价</label></div>
-            <input type="number" class="price-input" placeholder="元/m³" min="0" step="1">
-            <div class="subtotal-line">
-              <span class="volume-out">0.000</span>
-              <span class="value"><span class="subtotal-out">0.00</span></span>
+
+            <!-- 单一规格 -->
+            <div id="coreSingleBlock">
+              <div class="row"><label>厚度</label></div>
+              <div class="inline-pair">
+                <select class="thickness-select"></select>
+                <input type="number" class="thickness-custom" placeholder="自定义(mm)" step="0.1" min="0.1">
+              </div>
+              <div class="row" style="margin-top:0.5rem;"><label>树种</label></div>
+              <select class="species-select">
+                <option value="桉树">桉树</option>
+                <option value="杉木">杉木</option>
+              </select>
+              <div class="row" style="margin-top:0.5rem;"><label>单价</label></div>
+              <input type="number" class="price-input" placeholder="元/m³" min="0" step="1">
+              <div class="subtotal-line">
+                <span class="volume-out">0.000</span>
+                <span class="value"><span class="subtotal-out">0.00</span></span>
+              </div>
+            </div>
+
+            <!-- 多规格分组 -->
+            <div id="coreMultiBlock" style="display:none;">
+              <div class="core-alloc-note" id="coreAllocNote">已分配 0 / 1 层</div>
+              <div id="coreGroupList"></div>
+              <button type="button" id="coreAddGroupBtn" class="add-group-btn">+ 添加规格</button>
+              <div class="subtotal-line">
+                <span>芯板合计</span>
+                <span class="value"><span id="coreMultiSubtotalOut">0.00</span> 元</span>
+              </div>
             </div>
           </div>
 
@@ -551,14 +692,15 @@ function buildThicknessSelect(select) {
 }
 document.querySelectorAll('.thickness-select').forEach(buildThicknessSelect);
 
-document.querySelectorAll('.inline-pair').forEach(pair => {
+function wireInlinePair(pair) {
   const select = pair.querySelector('.thickness-select');
   const customInput = pair.querySelector('.thickness-custom');
   select.addEventListener('change', () => {
     customInput.style.display = select.value === 'custom' ? 'block' : 'none';
     calculate();
   });
-});
+}
+document.querySelectorAll('.inline-pair').forEach(wireInlinePair);
 
 function getThicknessFrom(container) {
   const select = container.querySelector('.thickness-select');
@@ -585,20 +727,118 @@ unifyToggle.addEventListener('change', () => {
   calculate();
 });
 
-/* ---------- 总层数步进器（奇数 3~9）---------- */
+/* ---------- 芯板多规格分组 ---------- */
+const coreMultiToggle = document.getElementById('coreMultiToggle');
+const coreSingleBlock = document.getElementById('coreSingleBlock');
+const coreMultiBlock = document.getElementById('coreMultiBlock');
+const coreGroupList = document.getElementById('coreGroupList');
+const coreAddGroupBtn = document.getElementById('coreAddGroupBtn');
+const coreAllocNote = document.getElementById('coreAllocNote');
+
+coreMultiToggle.addEventListener('change', () => {
+  coreSingleBlock.style.display = coreMultiToggle.checked ? 'none' : 'block';
+  coreMultiBlock.style.display = coreMultiToggle.checked ? 'block' : 'none';
+  if (coreMultiToggle.checked && coreGroupList.children.length === 0) {
+    addCoreGroupRow();
+  }
+  updateCoreAllocNote();
+  calculate();
+});
+
+function getCoreGroupRows() {
+  return Array.from(coreGroupList.querySelectorAll('.core-group-row'));
+}
+function getCoreAllocated() {
+  return getCoreGroupRows().reduce((sum, row) => sum + (parseInt(row.dataset.count, 10) || 0), 0);
+}
+function updateCoreAllocNote() {
+  const coreLayers = totalLayers - 2;
+  const allocated = getCoreAllocated();
+  coreAllocNote.textContent = '已分配 ' + allocated + ' / ' + coreLayers + ' 层';
+  coreAllocNote.classList.toggle('mismatch', allocated !== coreLayers);
+  coreAddGroupBtn.disabled = allocated >= coreLayers;
+}
+
+function addCoreGroupRow() {
+  const coreLayers = totalLayers - 2;
+  const remaining = Math.max(coreLayers - getCoreAllocated(), 1);
+  const row = document.createElement('div');
+  row.className = 'core-group-row';
+  row.dataset.count = remaining;
+  row.innerHTML =
+    '<div class="inline-pair">' +
+      '<select class="thickness-select"></select>' +
+      '<input type="number" class="thickness-custom" placeholder="自定义(mm)" step="0.1" min="0.1">' +
+    '</div>' +
+    '<select class="species-select">' +
+      '<option value="桉树">桉树</option>' +
+      '<option value="杉木">杉木</option>' +
+    '</select>' +
+    '<input type="number" class="price-input" placeholder="元/m³" min="0" step="1">' +
+    '<div class="core-group-row-footer">' +
+      '<div class="stepper">' +
+        '<button type="button" class="group-dec">−</button>' +
+        '<span class="stepper-value group-count">' + remaining + ' 层</span>' +
+        '<button type="button" class="group-inc">+</button>' +
+      '</div>' +
+      '<button type="button" class="remove-group-btn">删除</button>' +
+    '</div>';
+
+  buildThicknessSelect(row.querySelector('.thickness-select'));
+  wireInlinePair(row.querySelector('.inline-pair'));
+
+  row.querySelector('.group-dec').addEventListener('click', () => {
+    let count = parseInt(row.dataset.count, 10);
+    if (count > 1) {
+      count--;
+      row.dataset.count = count;
+      row.querySelector('.group-count').textContent = count + ' 层';
+      updateCoreAllocNote();
+      calculate();
+    }
+  });
+  row.querySelector('.group-inc').addEventListener('click', () => {
+    let count = parseInt(row.dataset.count, 10);
+    if (count < totalLayers - 2) {
+      count++;
+      row.dataset.count = count;
+      row.querySelector('.group-count').textContent = count + ' 层';
+      updateCoreAllocNote();
+      calculate();
+    }
+  });
+  row.querySelector('.remove-group-btn').addEventListener('click', () => {
+    row.remove();
+    updateCoreAllocNote();
+    calculate();
+  });
+  row.querySelectorAll('select, input').forEach(el => {
+    el.addEventListener('input', calculate);
+    el.addEventListener('change', calculate);
+  });
+
+  coreGroupList.appendChild(row);
+  updateCoreAllocNote();
+}
+
+coreAddGroupBtn.addEventListener('click', () => {
+  addCoreGroupRow();
+  calculate();
+});
+
+/* ---------- 总层数滑块（奇数 3~9）---------- */
 let totalLayers = 3;
+const totalLayersSlider = document.getElementById('totalLayersSlider');
 function updateTotalLayersDisplay() {
   document.getElementById('totalLayersValue').textContent = totalLayers + ' 层';
-  document.getElementById('totalLayersDec').disabled = totalLayers <= 3;
-  document.getElementById('totalLayersInc').disabled = totalLayers >= 9;
   document.getElementById('coreLayersLabel').textContent = totalLayers - 2;
   document.querySelectorAll('.core-layer-count').forEach(el => el.textContent = totalLayers - 2);
+  updateCoreAllocNote();
 }
-document.getElementById('totalLayersDec').addEventListener('click', () => {
-  if (totalLayers > 3) { totalLayers -= 2; updateTotalLayersDisplay(); calculate(); }
-});
-document.getElementById('totalLayersInc').addEventListener('click', () => {
-  if (totalLayers < 9) { totalLayers += 2; updateTotalLayersDisplay(); calculate(); }
+totalLayersSlider.addEventListener('input', () => {
+  totalLayers = parseInt(totalLayersSlider.value, 10);
+  updateTotalLayersDisplay();
+  calculate();
 });
 updateTotalLayersDisplay();
 
@@ -639,13 +879,25 @@ function calculate() {
     const backCard = splitBlock.querySelector('.split-card[data-layer="back"]');
 
     face = layerCostCalc(getThicknessFrom(faceCard), getPriceFrom(faceCard), 1);
-    core = layerCostCalc(getThicknessFrom(coreCard), getPriceFrom(coreCard), coreLayers);
     back = layerCostCalc(getThicknessFrom(backCard), getPriceFrom(backCard), 1);
+
+    if (coreMultiToggle.checked) {
+      core = { volume: 0, cost: 0 };
+      getCoreGroupRows().forEach(row => {
+        const result = layerCostCalc(getThicknessFrom(row), getPriceFrom(row), parseInt(row.dataset.count, 10) || 0);
+        core.volume += result.volume;
+        core.cost += result.cost;
+      });
+      document.getElementById('coreMultiSubtotalOut').textContent = core.cost.toFixed(2);
+      updateCoreAllocNote();
+    } else {
+      core = layerCostCalc(getThicknessFrom(coreCard), getPriceFrom(coreCard), coreLayers);
+      coreCard.querySelector('.volume-out').textContent = '用料 ' + core.volume.toFixed(4) + ' m³';
+      coreCard.querySelector('.subtotal-out').textContent = core.cost.toFixed(2) + ' 元';
+    }
 
     faceCard.querySelector('.volume-out').textContent = '用料 ' + face.volume.toFixed(4) + ' m³';
     faceCard.querySelector('.subtotal-out').textContent = face.cost.toFixed(2) + ' 元';
-    coreCard.querySelector('.volume-out').textContent = '用料 ' + core.volume.toFixed(4) + ' m³';
-    coreCard.querySelector('.subtotal-out').textContent = core.cost.toFixed(2) + ' 元';
     backCard.querySelector('.volume-out').textContent = '用料 ' + back.volume.toFixed(4) + ' m³';
     backCard.querySelector('.subtotal-out').textContent = back.cost.toFixed(2) + ' 元';
   }
