@@ -649,12 +649,17 @@
     </div>
 
     <div class="card">
-      <h2>运费 <span class="badge">总价 ÷（件数 × 张数）</span></h2>
+      <h2>运费 <span class="badge">单价×吨数 ÷（件数 × 张数）</span></h2>
       <div class="row">
-        <label>运费总价</label>
-        <input type="number" id="freightTotal" placeholder="元" min="0" step="1">
+        <label>运费单价</label>
+        <input type="number" id="freightUnitPrice" placeholder="元/吨" min="0" step="1">
       </div>
       <div class="row">
+        <label>总吨数</label>
+        <input type="number" id="freightTonnage" placeholder="吨" min="0" step="0.1">
+      </div>
+      <div class="readonly-note">运费总价 = <span id="freightTotalOut">0.00</span> 元</div>
+      <div class="row" style="margin-top:0.65rem;">
         <label>件数</label>
         <input type="number" id="freightUnits" placeholder="件" min="0" step="1">
       </div>
@@ -943,11 +948,14 @@ function calculate() {
   const laborCost = parseFloat(document.getElementById('laborPrice').value) || 0;
   const overheadCost = parseFloat(document.getElementById('overheadPrice').value) || 0;
 
-  const freightTotal = parseFloat(document.getElementById('freightTotal').value) || 0;
+  const freightUnitPrice = parseFloat(document.getElementById('freightUnitPrice').value) || 0;
+  const freightTonnage = parseFloat(document.getElementById('freightTonnage').value) || 0;
+  const freightTotal = freightUnitPrice * freightTonnage;
   const freightUnits = parseFloat(document.getElementById('freightUnits').value) || 0;
   const freightSheetsPerUnit = parseFloat(document.getElementById('freightSheetsPerUnit').value) || 0;
   const freightDenominator = freightUnits * freightSheetsPerUnit;
   const freightCost = freightDenominator > 0 ? freightTotal / freightDenominator : 0;
+  document.getElementById('freightTotalOut').textContent = freightTotal.toFixed(2);
 
   document.getElementById('glueSubtotal').textContent = glueCost.toFixed(2);
   document.getElementById('freightSubtotal').textContent = freightCost.toFixed(2);
