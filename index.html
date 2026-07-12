@@ -634,6 +634,26 @@
       </div>
     </div>
 
+    <div class="card">
+      <h2>运费 <span class="badge">总价 ÷（件数 × 张数）</span></h2>
+      <div class="row">
+        <label>运费总价</label>
+        <input type="number" id="freightTotal" placeholder="元" min="0" step="1">
+      </div>
+      <div class="row">
+        <label>件数</label>
+        <input type="number" id="freightUnits" placeholder="件" min="0" step="1">
+      </div>
+      <div class="row">
+        <label>张数/件</label>
+        <input type="number" id="freightSheetsPerUnit" placeholder="张/件" min="0" step="1">
+      </div>
+      <div class="subtotal-line">
+        <span>单张运费</span>
+        <span class="value"><span id="freightSubtotal">0.00</span> 元</span>
+      </div>
+    </div>
+
   </div>
 
   <div class="right-col summary-card">
@@ -647,6 +667,7 @@
         <tr><td>胶水 + 面粉</td><td id="sumGlue">0.00</td></tr>
         <tr><td>人工</td><td id="sumLabor">0.00</td></tr>
         <tr><td>电费/能源/管理费/固定开支</td><td id="sumOverhead">0.00</td></tr>
+        <tr><td>运费</td><td id="sumFreight">0.00</td></tr>
       </table>
     </div>
   </div>
@@ -908,7 +929,14 @@ function calculate() {
   const laborCost = parseFloat(document.getElementById('laborPrice').value) || 0;
   const overheadCost = parseFloat(document.getElementById('overheadPrice').value) || 0;
 
+  const freightTotal = parseFloat(document.getElementById('freightTotal').value) || 0;
+  const freightUnits = parseFloat(document.getElementById('freightUnits').value) || 0;
+  const freightSheetsPerUnit = parseFloat(document.getElementById('freightSheetsPerUnit').value) || 0;
+  const freightDenominator = freightUnits * freightSheetsPerUnit;
+  const freightCost = freightDenominator > 0 ? freightTotal / freightDenominator : 0;
+
   document.getElementById('glueSubtotal').textContent = glueCost.toFixed(2);
+  document.getElementById('freightSubtotal').textContent = freightCost.toFixed(2);
   document.getElementById('sumFace').textContent = face.cost.toFixed(2);
   document.getElementById('sumCore').textContent = core.cost.toFixed(2);
   document.getElementById('sumBack').textContent = back.cost.toFixed(2);
@@ -916,8 +944,9 @@ function calculate() {
   document.getElementById('sumGlue').textContent = glueCost.toFixed(2);
   document.getElementById('sumLabor').textContent = laborCost.toFixed(2);
   document.getElementById('sumOverhead').textContent = overheadCost.toFixed(2);
+  document.getElementById('sumFreight').textContent = freightCost.toFixed(2);
 
-  const total = face.cost + core.cost + back.cost + facingCost + glueCost + laborCost + overheadCost;
+  const total = face.cost + core.cost + back.cost + facingCost + glueCost + laborCost + overheadCost + freightCost;
   document.getElementById('grandTotal').textContent = total.toFixed(2);
 }
 
