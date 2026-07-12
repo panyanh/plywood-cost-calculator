@@ -226,12 +226,25 @@
   }
   input[type="range"] {
     -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 1.15rem;
+    background: transparent;
+    outline: none;
+    margin: 0.3rem 0;
+    cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-runnable-track {
     width: 100%;
     height: 0.35rem;
     border-radius: 999px;
     background: var(--accent-bg);
-    outline: none;
-    margin: 0.3rem 0;
+  }
+  input[type="range"]::-moz-range-track {
+    width: 100%;
+    height: 0.35rem;
+    border-radius: 999px;
+    background: var(--accent-bg);
   }
   input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
@@ -242,6 +255,7 @@
     cursor: pointer;
     border: 2px solid var(--card-bg);
     box-shadow: var(--shadow);
+    margin-top: -0.4rem;
   }
   input[type="range"]::-moz-range-thumb {
     width: 1.15rem;
