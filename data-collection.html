@@ -710,7 +710,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_UypYkt0llYxxx5q2n0byQw_T_ooWuH0';
 
 const sessionId = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2));
 
-function logEvent(eventType, inputs, totalCost) {
+function logEvent(payload) {
   if (SUPABASE_URL.includes('YOUR_PROJECT_ID')) return; // 尚未配置，静默跳过
   fetch(SUPABASE_URL + '/rest/v1/usage_logs', {
     method: 'POST',
@@ -720,19 +720,14 @@ function logEvent(eventType, inputs, totalCost) {
       'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
       'Prefer': 'return=minimal'
     },
-    body: JSON.stringify({
-      session_id: sessionId,
-      event_type: eventType,
-      inputs: inputs || null,
-      total_cost: totalCost ?? null
-    })
+    body: JSON.stringify(Object.assign({ session_id: sessionId }, payload))
   }).catch(() => {});
 }
 
 let logDebounceTimer = null;
-function scheduleCalculateLog(inputs, totalCost) {
+function scheduleCalculateLog(payload) {
   clearTimeout(logDebounceTimer);
-  logDebounceTimer = setTimeout(() => logEvent('calculate', inputs, totalCost), 1500);
+  logDebounceTimer = setTimeout(() => logEvent(payload), 1500);
 }
 
 /* ---------- 字体缩放 ---------- */
@@ -1027,15 +1022,31 @@ function calculate() {
   document.getElementById('grandTotal').textContent = total.toFixed(2);
 
   scheduleCalculateLog({
-    totalLayers, coreLayers,
-    unifyMode: unifyToggle.checked,
-    face: faceInfo, core: coreInfo, back: backInfo,
-    facingPrice: facingCost,
-    glueLayers, gluePrice,
-    laborPrice: laborCost,
-    overheadPrice: overheadCost,
-    freightUnitPrice, freightTonnage, freightUnits, freightSheetsPerUnit
-  }, total);
+    event_type: 'calculate',
+    total_layers: totalLayers,
+    unify_mode: unifyToggle.checked,
+    face_thickness_mm: faceInfo.thicknessMm,
+    face_species: faceInfo.species,
+    face_price: faceInfo.price,
+    core_mode: coreInfo.mode,
+    core_thickness_mm: coreInfo.mode === 'multi' ? null : coreInfo.thicknessMm,
+    core_species: coreInfo.mode === 'multi' ? null : coreInfo.species,
+    core_price: coreInfo.mode === 'multi' ? null : coreInfo.price,
+    core_groups: coreInfo.mode === 'multi' ? coreInfo.groups : null,
+    back_thickness_mm: backInfo.thicknessMm,
+    back_species: backInfo.species,
+    back_price: backInfo.price,
+    facing_price: facingCost,
+    glue_layers: glueLayers,
+    glue_price: gluePrice,
+    labor_price: laborCost,
+    overhead_price: overheadCost,
+    freight_unit_price: freightUnitPrice,
+    freight_tonnage: freightTonnage,
+    freight_units: freightUnits,
+    freight_sheets_per_unit: freightSheetsPerUnit,
+    total_cost: total
+  });
 }
 
 document.querySelectorAll('select, input').forEach(el => {
@@ -1044,7 +1055,7 @@ document.querySelectorAll('select, input').forEach(el => {
 });
 
 calculate();
-logEvent('page_load', null, null);
+logEvent({ event_type: 'page_load' });
 </script>
 
 </body>
