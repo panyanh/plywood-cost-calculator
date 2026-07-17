@@ -462,14 +462,16 @@
         <label style="padding-top: 0.3rem;">总层数</label>
         <div class="slider-wrap">
           <span class="slider-current" id="totalLayersValue">3 层</span>
-          <input type="range" id="totalLayersSlider" min="3" max="9" step="2" value="3" list="totalLayersTicks">
+          <input type="range" id="totalLayersSlider" min="0" max="5" step="1" value="0" list="totalLayersTicks">
           <datalist id="totalLayersTicks">
+            <option value="0"></option>
+            <option value="1"></option>
+            <option value="2"></option>
             <option value="3"></option>
+            <option value="4"></option>
             <option value="5"></option>
-            <option value="7"></option>
-            <option value="9"></option>
           </datalist>
-          <div class="slider-track-labels"><span>3层</span><span>5层</span><span>7层</span><span>9层</span></div>
+          <div class="slider-track-labels"><span>3层</span><span>4层</span><span>5层</span><span>6层</span><span>7层</span><span>9层</span></div>
         </div>
       </div>
       <div class="readonly-note">
@@ -605,6 +607,77 @@
     </div>
 
     <div class="card">
+      <h2>封边条</h2>
+      <div class="split-grid" style="grid-template-columns: repeat(2, 1fr);">
+        <div class="split-card" data-edge="long">
+          <h3>长边</h3>
+          <div class="row"><label>长度</label></div>
+          <select class="edge-length-select">
+            <option value="1.27" selected>1.27 m</option>
+            <option value="0.63">0.63 m</option>
+          </select>
+          <div class="row" style="margin-top:0.5rem;"><label>宽度</label></div>
+          <input type="number" class="edge-width-input" placeholder="m" min="0.05" max="0.1" step="0.01" value="0.05">
+          <div class="row" style="margin-top:0.5rem;"><label>厚度</label></div>
+          <div class="inline-pair">
+            <select class="thickness-select"></select>
+            <input type="number" class="thickness-custom" placeholder="自定义(mm)" step="0.1" min="0.1">
+          </div>
+          <div class="row" style="margin-top:0.5rem;"><label>树种</label></div>
+          <select class="species-select">
+            <option value="桉树">桉树</option>
+            <option value="杉木">杉木</option>
+          </select>
+          <div class="row" style="margin-top:0.5rem;"><label>单价</label></div>
+          <input type="number" class="price-input" placeholder="元/m³" min="0" step="1">
+          <div class="row" style="margin-top:0.5rem;"><label>条数</label></div>
+          <div class="stepper">
+            <button type="button" class="edge-count-dec">−</button>
+            <span class="stepper-value edge-count-value">1 条</span>
+            <button type="button" class="edge-count-inc">+</button>
+          </div>
+          <div class="subtotal-line">
+            <span class="volume-out">0.000</span>
+            <span class="value"><span class="subtotal-out">0.00</span></span>
+          </div>
+        </div>
+
+        <div class="split-card" data-edge="short">
+          <h3>短边</h3>
+          <div class="row"><label>长度</label></div>
+          <select class="edge-length-select">
+            <option value="1.27">1.27 m</option>
+            <option value="0.63" selected>0.63 m</option>
+          </select>
+          <div class="row" style="margin-top:0.5rem;"><label>宽度</label></div>
+          <input type="number" class="edge-width-input" placeholder="m" min="0.05" max="0.1" step="0.01" value="0.05">
+          <div class="row" style="margin-top:0.5rem;"><label>厚度</label></div>
+          <div class="inline-pair">
+            <select class="thickness-select"></select>
+            <input type="number" class="thickness-custom" placeholder="自定义(mm)" step="0.1" min="0.1">
+          </div>
+          <div class="row" style="margin-top:0.5rem;"><label>树种</label></div>
+          <select class="species-select">
+            <option value="桉树">桉树</option>
+            <option value="杉木">杉木</option>
+          </select>
+          <div class="row" style="margin-top:0.5rem;"><label>单价</label></div>
+          <input type="number" class="price-input" placeholder="元/m³" min="0" step="1">
+          <div class="row" style="margin-top:0.5rem;"><label>条数</label></div>
+          <div class="stepper">
+            <button type="button" class="edge-count-dec">−</button>
+            <span class="stepper-value edge-count-value">1 条</span>
+            <button type="button" class="edge-count-inc">+</button>
+          </div>
+          <div class="subtotal-line">
+            <span class="volume-out">0.000</span>
+            <span class="value"><span class="subtotal-out">0.00</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
       <h2>面皮 <span class="badge">固定 1 套 / 张</span></h2>
       <div class="row">
         <label>单价</label>
@@ -682,6 +755,7 @@
         <tr><td>面板单板</td><td id="sumFace">0.00</td></tr>
         <tr><td>芯板单板</td><td id="sumCore">0.00</td></tr>
         <tr><td>底板单板</td><td id="sumBack">0.00</td></tr>
+        <tr><td>封边条</td><td id="sumEdgeBand">0.00</td></tr>
         <tr><td>面皮</td><td id="sumFacing">0.00</td></tr>
         <tr><td>胶水 + 面粉</td><td id="sumGlue">0.00</td></tr>
         <tr><td>人工</td><td id="sumLabor">0.00</td></tr>
@@ -698,6 +772,7 @@ const LENGTH = 1.27;
 const WIDTH = 0.63;
 const SHEETS_PER_LAYER = 4;
 const THICKNESS_OPTIONS = ['1.5', '1.7', '2.0', '2.2', '2.8', '3.0', '3.2', '3.6'];
+const LAYER_OPTIONS = [3, 4, 5, 6, 7, 9];
 
 /* ---------- 字体缩放 ---------- */
 const FONT_LEVELS = [14, 16, 18, 21];
@@ -751,10 +826,49 @@ function getThicknessFrom(container) {
 function getPriceFrom(container) {
   return parseFloat(container.querySelector('.price-input').value) || 0;
 }
+function getSpeciesFrom(container) {
+  const select = container.querySelector('.species-select');
+  return select ? select.value : '';
+}
 function layerCostCalc(thicknessMm, price, layerCount) {
   const thicknessM = thicknessMm / 1000;
   const volume = LENGTH * WIDTH * thicknessM * SHEETS_PER_LAYER * layerCount;
   return { volume, cost: volume * price };
+}
+
+/* ---------- 封边条 ---------- */
+function wireEdgeCountStepper(card) {
+  card.dataset.count = card.dataset.count || '1';
+  const dec = card.querySelector('.edge-count-dec');
+  const inc = card.querySelector('.edge-count-inc');
+  const valueEl = card.querySelector('.edge-count-value');
+  function render() {
+    const count = parseInt(card.dataset.count, 10);
+    valueEl.textContent = count + ' 条';
+    dec.disabled = count <= 1;
+    inc.disabled = count >= 5;
+  }
+  dec.addEventListener('click', () => {
+    let count = parseInt(card.dataset.count, 10);
+    if (count > 1) { count--; card.dataset.count = count; render(); calculate(); }
+  });
+  inc.addEventListener('click', () => {
+    let count = parseInt(card.dataset.count, 10);
+    if (count < 5) { count++; card.dataset.count = count; render(); calculate(); }
+  });
+  render();
+}
+document.querySelectorAll('.split-card[data-edge]').forEach(wireEdgeCountStepper);
+
+function edgeBandCostCalc(card) {
+  const lengthM = parseFloat(card.querySelector('.edge-length-select').value) || 0;
+  const widthM = parseFloat(card.querySelector('.edge-width-input').value) || 0;
+  const thicknessMm = getThicknessFrom(card);
+  const thicknessM = thicknessMm / 1000;
+  const price = getPriceFrom(card);
+  const count = parseInt(card.dataset.count, 10) || 0;
+  const volume = lengthM * widthM * thicknessM * count;
+  return { volume, cost: volume * price, lengthM, widthM, thicknessMm, species: getSpeciesFrom(card), price, count };
 }
 
 /* ---------- 三层统一开关 ---------- */
@@ -866,17 +980,17 @@ coreAddGroupBtn.addEventListener('click', () => {
   calculate();
 });
 
-/* ---------- 总层数滑块（奇数 3~9）---------- */
-let totalLayers = 3;
+/* ---------- 总层数滑块（3/4/5/6/7/9）---------- */
+let totalLayers = LAYER_OPTIONS[0];
 const totalLayersSlider = document.getElementById('totalLayersSlider');
 function updateTotalLayersDisplay() {
+  totalLayers = LAYER_OPTIONS[parseInt(totalLayersSlider.value, 10)];
   document.getElementById('totalLayersValue').textContent = totalLayers + ' 层';
   document.getElementById('coreLayersLabel').textContent = totalLayers - 2;
   document.querySelectorAll('.core-layer-count').forEach(el => el.textContent = totalLayers - 2);
   updateCoreAllocNote();
 }
 totalLayersSlider.addEventListener('input', () => {
-  totalLayers = parseInt(totalLayersSlider.value, 10);
   updateTotalLayersDisplay();
   calculate();
 });
@@ -942,6 +1056,16 @@ function calculate() {
     backCard.querySelector('.subtotal-out').textContent = back.cost.toFixed(2) + ' 元';
   }
 
+  const longEdgeCard = document.querySelector('.split-card[data-edge="long"]');
+  const shortEdgeCard = document.querySelector('.split-card[data-edge="short"]');
+  const longEdge = edgeBandCostCalc(longEdgeCard);
+  const shortEdge = edgeBandCostCalc(shortEdgeCard);
+  longEdgeCard.querySelector('.volume-out').textContent = '用料 ' + longEdge.volume.toFixed(4) + ' m³';
+  longEdgeCard.querySelector('.subtotal-out').textContent = longEdge.cost.toFixed(2) + ' 元';
+  shortEdgeCard.querySelector('.volume-out').textContent = '用料 ' + shortEdge.volume.toFixed(4) + ' m³';
+  shortEdgeCard.querySelector('.subtotal-out').textContent = shortEdge.cost.toFixed(2) + ' 元';
+  const edgeBandCost = longEdge.cost + shortEdge.cost;
+
   const facingCost = parseFloat(document.getElementById('facingPrice').value) || 0;
   const gluePrice = parseFloat(document.getElementById('gluePrice').value) || 0;
   const glueCost = gluePrice * glueLayers;
@@ -962,13 +1086,14 @@ function calculate() {
   document.getElementById('sumFace').textContent = face.cost.toFixed(2);
   document.getElementById('sumCore').textContent = core.cost.toFixed(2);
   document.getElementById('sumBack').textContent = back.cost.toFixed(2);
+  document.getElementById('sumEdgeBand').textContent = edgeBandCost.toFixed(2);
   document.getElementById('sumFacing').textContent = facingCost.toFixed(2);
   document.getElementById('sumGlue').textContent = glueCost.toFixed(2);
   document.getElementById('sumLabor').textContent = laborCost.toFixed(2);
   document.getElementById('sumOverhead').textContent = overheadCost.toFixed(2);
   document.getElementById('sumFreight').textContent = freightCost.toFixed(2);
 
-  const total = face.cost + core.cost + back.cost + facingCost + glueCost + laborCost + overheadCost + freightCost;
+  const total = face.cost + core.cost + back.cost + edgeBandCost + facingCost + glueCost + laborCost + overheadCost + freightCost;
   document.getElementById('grandTotal').textContent = total.toFixed(2);
 }
 
